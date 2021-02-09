@@ -3,43 +3,20 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Tag;
 
-use Illuminate\Support\Facades\Auth;
-
-class TestController extends Controller
+class TagsController extends Controller
 {
-    //definisco il contruct collegateo al middleware auth
-    //così ogni funzione agirà solo se l'utente è loggato
-    public function __construct(){
-        /* $this->middleware('auth'); */ 
-    }
-
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-
-    public function logged()
-    {
-        if(Auth::check()){
-            $user = 'Ciao ' .  Auth::user()->name . '!';
-        }else{
-            abort(401);//vengo reindirizzato a login
-        }
-        
-        return view('hello',compact('user'));
-    }
-
-    public function guest()
-    {
-        $user = 'Ciao utente';
-        return view('hello',compact('user'));
-    }
-  
     public function index()
     {
-        //   
+        $tags = Tag::all();
+
+        return view('tags.index',compact('tags'));
     }
 
     /**
@@ -69,9 +46,11 @@ class TestController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Tag $tag)
     {
-        //
+        
+
+        return view('tags.show', compact('tag'));
     }
 
     /**
