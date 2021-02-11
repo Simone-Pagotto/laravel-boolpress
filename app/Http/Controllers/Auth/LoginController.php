@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use App\User;
+
 
 class LoginController extends Controller
 {
@@ -20,7 +23,7 @@ class LoginController extends Controller
     |
     */
 
-    use AuthenticatesUsers;
+    use AuthenticatesUsers; 
 
     /**
      * Where to redirect users after login.
@@ -39,6 +42,26 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
+    /* public function login(Request $request){
+        $credentials = $request->only('email_name', 'password');
+
+        
+
+        $user = User::where('name', $credentials['email_name'])->get();
+            dd($request->only('email_name', 'password'),$user->password);
+        if (!empty($user) && $user->password == $credentials['password']) {
+            // Authentication passed...
+            return redirect()->intended(RouteServiceProvider::HOME);
+        }
+
+        $user = User::where('email', $credentials['email_name'])->get();
+
+        if (!empty($user) && $user->password == $credentials['password']) {
+            // Authentication passed...
+            return redirect()->intended(RouteServiceProvider::HOME);
+        }
+    }
+ */
     public function username(){
         
         return 'name';

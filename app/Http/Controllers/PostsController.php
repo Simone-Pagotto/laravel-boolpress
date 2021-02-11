@@ -11,6 +11,7 @@ use App\Tag;
 use Illuminate\Support\Str;
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Collection;
 
 
 class PostsController extends Controller
@@ -82,20 +83,30 @@ class PostsController extends Controller
         $newPost = new Post();
         $newPostInformation = new PostInformation();
 
-        //fornisco i dati agli oggetti/colonne per tutte le variabili
-        $newPost->title = $request['title_in'];
-        $newPost->author = $request['author_in'];
-        $newPost->category_id = $request['category_in'];
+        //faccio la validazione degli input del form in posts.create
+        $validatedRequest = $request->validate([
+            'title_in' => 'bail|required|min:4',
+            'author_in' => 'bail|required|min:4',
+            'category_in' => 'bail|required',
+            'description_in' => 'bail|required|between:4,12',
+            'tags_in[]' => 'required_without_all:tags_in',
+        ]);
+            dd($request,$validatedRequest);
 
-        $newPostInformation->description = $request['description_in'];
-        $newPostInformation->slug = Str::of($request['title_in'])->slug('-');
+        //fornisco i dati agli oggetti/colonne per tutte le variabili
+        $newPost->title = $validatedRequest['title_in'];
+        $newPost->author = $validatedRequest['author_in'];
+        $newPost->category_id = $validatedRequest['category_in'];
+
+        $newPostInformation->description = $validatedRequest['description_in'];
+        $newPostInformation->slug = Str::of($validatedRequest['title_in'])->slug('-');
 
         $newPost->save();
         
         //salvataggio relationship tra le due variabili quindi colonne
         $newPost->postInformation()->save($newPostInformation);
 
-        $newPost->tags()->attach($request['tags_in']);
+        $newPost->tags()->attach($validatedRequest['tags_in']);
         
 
     
@@ -160,8 +171,10 @@ class PostsController extends Controller
         $updatingPost->save();
 
         $updatingPost->postInformation()->save($updatingPostInformation);//salvataggio relationship
-        /* dd($updatingPost->tags->name); */
-        $updatingPost->tags()->attach($request['tags_in'])->diff();//BUG devo controllare che non sovrascriva quelli già salvati
+
+        //cancello tutto e inscrivo la nuova request!
+        $updatingPost->tags()->detach();
+        $updatingPost->tags()->attach(collect($request['tags_in']));
 
         return view('posts.success');
     }
